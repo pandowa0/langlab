@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panglish — 英単語学習</title>
+<style>
+:root {
+  --ink: #1a1208;
+  --paper: #faf7f2;
+  --surface: #f0ebe0;
+  --border: #ddd4c0;
+  --muted: #8a7860;
+  --accent: #c8821a;
+  --green: #2d6a4f;
+  --blue: #1a5c8a;
+  --beginner: #2d6a4f;
+  --intermediate: #c8821a;
+  --advanced: #8a1a1a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #e8e0d4; display: flex; justify-content: center; min-height: 100vh; padding: 2rem 1rem; font-family: 'Georgia', serif; }
+.app { width: 100%; max-width: 480px; background: var(--paper); border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.12); overflow: hidden; color: var(--ink); align-self: flex-start; }
+
+.hdr { padding: 1.1rem 1.5rem 0.9rem; border-bottom: 1px solid var(--border); }
+.hdr-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
+.logo { font-size: 1.4rem; font-weight: 700; }
+.logo span { color: var(--accent); }
+.streak { font-size: 0.72rem; color: var(--muted); font-family: sans-serif; background: var(--surface); padding: 3px 10px; border-radius: 20px; }
+
+.level-bar { display: flex; gap: 6px; }
+.lv-btn { flex: 1; padding: 6px 8px; border-radius: 9px; border: 1.5px solid var(--border); background: var(--paper); font-family: sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.15s; color: var(--muted); text-align: center; }
+.lv-btn.beginner.active { background: var(--beginner); color: #fff; border-color: var(--beginner); }
+.lv-btn.intermediate.active { background: var(--intermediate); color: #fff; border-color: var(--intermediate); }
+.lv-btn.advanced.active { background: var(--advanced); color: #fff; border-color: var(--advanced); }
+.lv-btn:hover:not(.active) { border-color: var(--muted); color: var(--ink); }
+
+.content { padding: 1.25rem 1.5rem; min-height: 480px; }
+
+.prog-wrap { margin-bottom: 1rem; }
+.prog-label { display: flex; justify-content: space-between; font-size: 0.7rem; font-family: sans-serif; color: var(--muted); margin-bottom: 3px; }
+.prog-track { height: 4px; background: var(--surface); border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 4px; border-radius: 2px; transition: width 0.4s ease; background: var(--accent); }
+
+.word-card { border: 1px solid var(--border); border-radius: 18px; padding: 1.75rem 1.5rem; text-align: center; cursor: pointer; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 0.85rem; transition: all 0.2s; background: var(--paper); border-top: 3px solid var(--accent); }
+.word-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.word-card:active { transform: scale(0.99); }
+.word-title { font-size: 1.9rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: 0.02em; }
+.word-phonetic { font-size: 0.88rem; color: var(--blue); font-family: sans-serif; margin-bottom: 0.2rem; letter-spacing: 0.04em; }
+.word-katakana { font-size: 0.78rem; color: var(--muted); font-family: sans-serif; margin-bottom: 0.6rem; }
+.word-pos { font-size: 0.68rem; font-family: sans-serif; background: var(--surface); color: var(--muted); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-bottom: 0.6rem; }
+.word-meaning { font-size: 1rem; color: var(--accent); font-weight: 700; margin-bottom: 0.45rem; }
+.word-example { font-size: 0.8rem; color: var(--muted); font-style: italic; line-height: 1.55; }
+.click-hint { font-size: 0.72rem; color: #ccc; font-family: sans-serif; margin-top: 0.65rem; }
+
+.phonetic-box { background: var(--surface); border-radius: 11px; padding: 0.8rem 1rem; margin-bottom: 0.8rem; font-family: sans-serif; }
+.phonetic-box-title { font-size: 0.67rem; color: var(--muted); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.phonetic-symbol { font-size: 0.95rem; color: var(--blue); font-weight: 700; margin-bottom: 4px; }
+.phonetic-desc { font-size: 0.78rem; color: var(--ink); line-height: 1.65; }
+
+.syn-panel { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 0.85rem; }
+.syn-header { background: var(--surface); padding: 0.5rem 0.9rem; font-size: 0.67rem; font-family: sans-serif; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+.syn-row { display: flex; align-items: flex-start; padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border); gap: 0.7rem; }
+.syn-row:last-child { border-bottom: none; }
+.syn-word { font-size: 0.88rem; font-weight: 700; color: var(--ink); min-width: 100px; font-family: 'Georgia', serif; flex-shrink: 0; }
+.syn-word.current { color: var(--accent); }
+.syn-detail { font-size: 0.76rem; color: var(--muted); font-family: sans-serif; line-height: 1.5; flex: 1; }
+.syn-tag { display: inline-block; font-size: 0.6rem; font-family: sans-serif; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-bottom: 2px; }
+.syn-tag.casual { background: #e8f5f0; color: var(--green); }
+.syn-tag.formal { background: #e8f0f8; color: var(--blue); }
+.syn-tag.neutral { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+.syn-tag.specific { background: #fdf0e8; color: var(--accent); }
+
+.btn { border: none; border-radius: 9px; padding: 0.65rem 1.1rem; cursor: pointer; font-family: sans-serif; font-weight: 700; font-size: 0.85rem; transition: all 0.15s; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { opacity: 0.88; }
+
+.loop-badge { display: inline-block; font-size: 0.68rem; font-family: sans-serif; background: var(--surface); color: var(--muted); padding: 3px 10px; border-radius: 20px; margin-bottom: 0.85rem; }
+
+/* 発音チェック */
+.mic-box { border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 0.85rem; font-family: sans-serif; }
+.mic-box-title { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+.mic-btn { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 10px; font-family: sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--ink); }
+.mic-btn.listening { background: #fee; border-color: #c0392b; color: #c0392b; animation: pulse 1s infinite; }
+.mic-btn:hover:not(.listening) { border-color: var(--muted); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+.mic-status { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 0.55rem; min-height: 1.2em; }
+.mic-result { margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+.mic-result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+.mic-result-label { font-size: 0.7rem; color: var(--muted); }
+.mic-result-val { font-size: 0.9rem; font-weight: 700; }
+.mic-result-val.correct { color: var(--green); }
+.mic-result-val.wrong { color: #c0392b; }
+.mic-advice { font-size: 0.78rem; color: var(--ink); background: var(--surface); border-radius: 8px; padding: 0.6rem 0.8rem; margin-top: 0.6rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="logo">Lang<span>Lab</span> <span style="font-size:0.85rem;font-weight:400;color:var(--muted);font-family:sans-serif">単語</span></div>
+      <div class="streak" id="streak-lbl">🔥 0日連続</div>
+    </div>
+    <div class="level-bar">
+      <button class="lv-btn beginner active" onclick="setLevel('beginner')">🟢 初級</button>
+      <button class="lv-btn intermediate" onclick="setLevel('intermediate')">🟡 中級</button>
+      <button class="lv-btn advanced" onclick="setLevel('advanced')">🔴 上級</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+const VOCAB = {
+  beginner: [
+    {word:"eat",phonetic:"/iːt/",katakana:"イート",pos:"動詞",meaning:"食べる",example:"I eat breakfast every morning.",
+     phoneticGuide:"iː → 「イー」と長めに伸ばす / t → 語末は軽く「ト」",
+     synonyms:[
+       {word:"eat",tag:"neutral",desc:"最も一般的。どんな場面でも使える"},
+       {word:"have",tag:"formal",desc:"「have lunch」食事をとる。やや丁寧"},
+       {word:"grab",tag:"casual",desc:"「grab a bite」さっと食べる。口語的"},
+       {word:"dine",tag:"formal",desc:"「dine out」レストランで正式に食事する"},
+     ]},
+    {word:"go",phonetic:"/ɡoʊ/",katakana:"ゴウ",pos:"動詞",meaning:"行く",example:"I go to school every day.",
+     phoneticGuide:"ɡ → 喉の奥から「グ」/ oʊ → 「オウ」と二重母音で伸ばす",
+     synonyms:[
+       {word:"go",tag:"neutral",desc:"最も一般的な移動の表現"},
+       {word:"head",tag:"casual",desc:"「head to」目的地に向かうイメージ"},
+       {word:"travel",tag:"specific",desc:"長距離移動・旅行に特化"},
+       {word:"proceed",tag:"formal",desc:"「proceed to gate 3」公式・フォーマルな場面"},
+     ]},
+    {word:"buy",phonetic:"/baɪ/",katakana:"バイ",pos:"動詞",meaning:"買う",example:"I want to buy a new bag.",
+     phoneticGuide:"b → 唇を合わせて「バ」/ aɪ → 「アイ」と二重母音",
+     synonyms:[
+       {word:"buy",tag:"neutral",desc:"最も一般的な「買う」"},
+       {word:"purchase",tag:"formal",desc:"公式・ビジネスシーンでの「購入する」"},
+       {word:"pick up",tag:"casual",desc:"「pick up milk」ついでに買ってくる感覚"},
+       {word:"get",tag:"casual",desc:"「get coffee」口語で「買う・手に入れる」"},
+     ]},
+    {word:"want",phonetic:"/wɒnt/",katakana:"ウォント",pos:"動詞",meaning:"欲しい・〜したい",example:"I want to learn English.",
+     phoneticGuide:"w → 唇を丸めて「ウ」/ ɒnt → 「オント」（口を大きく開ける）",
+     synonyms:[
+       {word:"want",tag:"neutral",desc:"最も一般的な「欲しい・したい」"},
+       {word:"would like",tag:"formal",desc:"「I'd like~」wantより丁寧。注文・依頼に"},
+       {word:"wish",tag:"specific",desc:"「I wish I could」実現が難しい願望"},
+       {word:"need",tag:"neutral",desc:"「必要とする」wantは欲求、needは必要性"},
+     ]},
+    {word:"say",phonetic:"/seɪ/",katakana:"セイ",pos:"動詞",meaning:"言う",example:"What did you say?",
+     phoneticGuide:"s → 「ス」と息を出す / eɪ → 「エイ」と二重母音",
+     synonyms:[
+       {word:"say",tag:"neutral",desc:"言葉の内容を伝える。「say hello」"},
+       {word:"tell",tag:"neutral",desc:"相手に情報を伝える。「tell me」"},
+       {word:"speak",tag:"formal",desc:"「speak English」言語・公式な場での発話"},
+       {word:"talk",tag:"casual",desc:"「talk with friends」会話・雑談のニュアンス"},
+     ]},
+    {word:"come",phonetic:"/kʌm/",katakana:"カム",pos:"動詞",meaning:"来る",example:"Can you come to my house?",
+     phoneticGuide:"k → 「ク」/ ʌm → 「アム」（ʌは口を半開き）",
+     synonyms:[
+       {word:"come",tag:"neutral",desc:"話者に近づく方向の移動"},
+       {word:"arrive",tag:"neutral",desc:"「arrive at」目的地に到着するニュアンス"},
+       {word:"show up",tag:"casual",desc:"「show up late」姿を現す。口語的"},
+       {word:"visit",tag:"specific",desc:"「visit a friend」訪問する・立ち寄る"},
+     ]},
+    {word:"see",phonetic:"/siː/",katakana:"シー",pos:"動詞",meaning:"見える・会う",example:"I can see the mountain from here.",
+     phoneticGuide:"s → 「ス」/ iː → 「イー」と長めに伸ばす",
+     synonyms:[
+       {word:"see",tag:"neutral",desc:"自然に目に入る・人に会う"},
+       {word:"look",tag:"neutral",desc:"意識して目を向ける。「look at」"},
+       {word:"watch",tag:"specific",desc:"動くものを注意して見る。「watch TV」"},
+       {word:"meet",tag:"specific",desc:"「meet a friend」人と会う（初対面・約束）"},
+     ]},
+    {word:"know",phonetic:"/noʊ/",katakana:"ノウ",pos:"動詞",meaning:"知っている",example:"Do you know his name?",
+     phoneticGuide:"k → 発音しない（silent k）/ noʊ → 「ノウ」と二重母音",
+     synonyms:[
+       {word:"know",tag:"neutral",desc:"知識・情報を持っている状態"},
+       {word:"understand",tag:"neutral",desc:"「理解している」単なる知識より深い"},
+       {word:"recognize",tag:"specific",desc:"「見て・聞いて」識別・認識できる"},
+       {word:"realize",tag:"specific",desc:"「気づく・わかる」新たに認識するニュアンス"},
+     ]},
+    {word:"think",phonetic:"/θɪŋk/",katakana:"シンク",pos:"動詞",meaning:"思う・考える",example:"I think this is a good idea.",
+     phoneticGuide:"θ → 舌先を上下の歯の間に挟んで「ス」/ ɪŋk → 「インク」",
+     synonyms:[
+       {word:"think",tag:"neutral",desc:"考える・〜だと思う。最も汎用的"},
+       {word:"believe",tag:"neutral",desc:"「信じている」より確信度高め"},
+       {word:"consider",tag:"formal",desc:"「検討する・じっくり考える」"},
+       {word:"feel",tag:"casual",desc:"「feel like」感覚的に思う・感じる"},
+     ]},
+    {word:"work",phonetic:"/wɜːrk/",katakana:"ワーク",pos:"動詞/名詞",meaning:"働く・仕事",example:"I work at a company in Tokyo.",
+     phoneticGuide:"w → 唇を丸めて「ウ」/ ɜːrk → 「ワーク」（ɜːは口を丸めて）",
+     synonyms:[
+       {word:"work",tag:"neutral",desc:"働く・機能する。最も汎用的"},
+       {word:"labor",tag:"formal",desc:"「労働する」肉体労働のニュアンスも"},
+       {word:"function",tag:"formal",desc:"「機能する・作動する」"},
+       {word:"operate",tag:"formal",desc:"「操作する・経営する」ビジネス文脈"},
+     ]},
+    {word:"need",phonetic:"/niːd/",katakana:"ニード",pos:"動詞",meaning:"必要とする",example:"I need your help.",
+     phoneticGuide:"n → 「ン」/ iːd → 「イード」と長めに",
+     synonyms:[
+       {word:"need",tag:"neutral",desc:"必要性がある。wantより強い必要度"},
+       {word:"require",tag:"formal",desc:"「要求する」ビジネス・公式文書"},
+       {word:"must have",tag:"specific",desc:"「絶対に必要な」強い必要性を強調"},
+       {word:"depend on",tag:"specific",desc:"「〜に頼る・依存する」"},
+     ]},
+    {word:"make",phonetic:"/meɪk/",katakana:"メイク",pos:"動詞",meaning:"作る・〜にする",example:"Can you make me a coffee?",
+     phoneticGuide:"m → 唇を閉じて「ム」/ eɪk → 「エイク」と二重母音",
+     synonyms:[
+       {word:"make",tag:"neutral",desc:"作る・〜の状態にする。最も広く使える"},
+       {word:"create",tag:"formal",desc:"「創造する」アート・ビジネスで"},
+       {word:"produce",tag:"formal",desc:"「生産する・制作する」"},
+       {word:"build",tag:"specific",desc:"「建てる・構築する」物理的なものを作る"},
+     ]},
+    {word:"use",phonetic:"/juːz/",katakana:"ユーズ",pos:"動詞",meaning:"使う",example:"Can I use your phone?",
+     phoneticGuide:"j → 「ユ」/ uːz → 「ウーズ」（動詞はzの音）",
+     synonyms:[
+       {word:"use",tag:"neutral",desc:"最も一般的な「使う」"},
+       {word:"utilize",tag:"formal",desc:"「活用する」より目的意識が高い"},
+       {word:"employ",tag:"formal",desc:"「使用する・採用する」フォーマル"},
+       {word:"apply",tag:"specific",desc:"「適用する・応用する」"},
+     ]},
+    {word:"get",phonetic:"/ɡet/",katakana:"ゲット",pos:"動詞",meaning:"得る・なる・理解する",example:"I don't get what you mean.",
+     phoneticGuide:"ɡ → 喉の奥から「ゲ」/ et → 「エット」",
+     synonyms:[
+       {word:"get",tag:"casual",desc:"「得る・なる・理解する」非常に多用途"},
+       {word:"obtain",tag:"formal",desc:"「入手する・取得する」フォーマル"},
+       {word:"receive",tag:"neutral",desc:"「受け取る」誰かから渡されるニュアンス"},
+       {word:"understand",tag:"neutral",desc:"「get it」＝「わかった」のフォーマル版"},
+     ]},
+    {word:"give",phonetic:"/ɡɪv/",katakana:"ギヴ",pos:"動詞",meaning:"与える・渡す",example:"Can you give me a hand?",
+     phoneticGuide:"ɡ → 「ギ」/ ɪv → 「イヴ」（vは上の歯を下唇に当てる）",
+     synonyms:[
+       {word:"give",tag:"neutral",desc:"与える・渡す。最も一般的"},
+       {word:"hand",tag:"casual",desc:"「hand over」手渡す"},
+       {word:"offer",tag:"formal",desc:"「提供する・申し出る」"},
+       {word:"provide",tag:"formal",desc:"「提供する・供給する」"},
+     ]},
+    {word:"like",phonetic:"/laɪk/",katakana:"ライク",pos:"動詞",meaning:"好き・好む",example:"I like coffee in the morning.",
+     phoneticGuide:"l → 舌先を上の歯茎に当てて「ル」/ aɪk → 「アイク」",
+     synonyms:[
+       {word:"like",tag:"neutral",desc:"好き・好む。最も一般的"},
+       {word:"love",tag:"casual",desc:"「大好き」likeより強い好意"},
+       {word:"enjoy",tag:"neutral",desc:"「楽しむ」活動・体験を楽しむニュアンス"},
+       {word:"prefer",tag:"formal",desc:"「〜より〜の方が好き」比較で好みを表す"},
+     ]},
+    {word:"look",phonetic:"/lʊk/",katakana:"ルック",pos:"動詞",meaning:"見る・〜に見える",example:"You look tired today.",
+     phoneticGuide:"l → 「ル」/ ʊk → 「ウック」（ʊは口を丸めて短く）",
+     synonyms:[
+       {word:"look",tag:"neutral",desc:"意識して目を向ける / 〜に見える"},
+       {word:"appear",tag:"formal",desc:"「〜のように見える・思われる」"},
+       {word:"seem",tag:"neutral",desc:"「〜のようだ」外見・状況から判断"},
+       {word:"glance",tag:"specific",desc:"「ちらっと見る」一瞬視線を向ける"},
+     ]},
+    {word:"take",phonetic:"/teɪk/",katakana:"テイク",pos:"動詞",meaning:"取る・持っていく・かかる",example:"It takes 30 minutes by train.",
+     phoneticGuide:"t → 「テ」/ eɪk → 「エイク」と二重母音",
+     synonyms:[
+       {word:"take",tag:"neutral",desc:"取る・持っていく・（時間が）かかる"},
+       {word:"grab",tag:"casual",desc:"「つかむ・さっと取る」素早いニュアンス"},
+       {word:"bring",tag:"neutral",desc:"「持ってくる」takeは遠ざかる方向"},
+       {word:"carry",tag:"specific",desc:"「運ぶ・持ち歩く」継続して持つニュアンス"},
+     ]},
+    {word:"help",phonetic:"/help/",katakana:"ヘルプ",pos:"動詞/名詞",meaning:"助ける・助け",example:"Can I help you with anything?",
+     phoneticGuide:"h → 喉から息を出して「ヘ」/ elp → 「エルプ」",
+     synonyms:[
+       {word:"help",tag:"neutral",desc:"最も一般的な「助ける」"},
+       {word:"assist",tag:"formal",desc:"「補佐する・手伝う」よりフォーマル"},
+       {word:"support",tag:"neutral",desc:"「支援する」継続的なサポートのニュアンス"},
+       {word:"aid",tag:"formal",desc:"「援助する」緊急・重大な状況でも使う"},
+     ]},
+    {word:"ask",phonetic:"/æsk/",katakana:"アスク",pos:"動詞",meaning:"聞く・頼む",example:"Can I ask you a question?",
+     phoneticGuide:"æ → 口を大きく横に開いて「ア」/ sk → 「スク」",
+     synonyms:[
+       {word:"ask",tag:"neutral",desc:"聞く・頼む。最も汎用的"},
+       {word:"request",tag:"formal",desc:"「正式に依頼する」ビジネス・書類で"},
+       {word:"inquire",tag:"formal",desc:"「問い合わせる」フォーマルな質問"},
+       {word:"beg",tag:"specific",desc:"「懇願する」切実にお願いするニュアンス"},
+     ]},
+  ],
+  intermediate: [
+    {word:"persist",phonetic:"/pəˈsɪst/",katakana:"パシスト",pos:"動詞",meaning:"粘り強く続ける",example:"You must persist despite setbacks.",
+     phoneticGuide:"pə → 「パ」（軽く）/ sɪst → 「シスト」",
+     synonyms:[
+       {word:"persist",tag:"neutral",desc:"困難があっても続けるニュアンス"},
+       {word:"persevere",tag:"formal",desc:"より強い意志で耐え忍ぶ。文語的"},
+       {word:"keep going",tag:"casual",desc:"「続けろ・やめるな」口語的"},
+       {word:"endure",tag:"formal",desc:"苦しみに耐えるニュアンスが強い"},
+     ]},
+    {word:"clarify",phonetic:"/ˈklær.ɪ.faɪ/",katakana:"クラリファイ",pos:"動詞",meaning:"明確にする",example:"Could you clarify what you mean?",
+     phoneticGuide:"klær → 「クラー」（æは口を大きく）/ faɪ → 「ファイ」",
+     synonyms:[
+       {word:"clarify",tag:"neutral",desc:"説明をわかりやすくする"},
+       {word:"explain",tag:"neutral",desc:"「説明する」最も一般的"},
+       {word:"elaborate",tag:"formal",desc:"「詳しく説明する」"},
+       {word:"simplify",tag:"neutral",desc:"複雑なものをシンプルにする"},
+     ]},
+    {word:"effective",phonetic:"/ɪˈfek.tɪv/",katakana:"イフェクティヴ",pos:"形容詞",meaning:"効果的な",example:"This is an effective method.",
+     phoneticGuide:"ɪ → 「イ」/ fek → 「フェク」/ tɪv → 「ティヴ」",
+     synonyms:[
+       {word:"effective",tag:"neutral",desc:"目的を達成する効果がある"},
+       {word:"efficient",tag:"neutral",desc:"無駄なく効率的"},
+       {word:"powerful",tag:"casual",desc:"強力な・インパクトがある"},
+       {word:"productive",tag:"specific",desc:"生産性が高い"},
+     ]},
+    {word:"assume",phonetic:"/əˈsjuːm/",katakana:"アシューム",pos:"動詞",meaning:"思い込む・仮定する",example:"Don't assume you know the answer.",
+     phoneticGuide:"ə → 「ア」（軽く）/ sjuːm → 「シューム」",
+     synonyms:[
+       {word:"assume",tag:"neutral",desc:"根拠なく「〜だろう」と思い込む"},
+       {word:"presume",tag:"formal",desc:"より根拠のある推測"},
+       {word:"suppose",tag:"neutral",desc:"「〜と思う」口語でも使いやすい"},
+       {word:"guess",tag:"casual",desc:"「たぶん〜」カジュアルな推測"},
+     ]},
+    {word:"impact",phonetic:"/ˈɪm.pækt/",katakana:"インパクト",pos:"名詞/動詞",meaning:"影響・インパクト",example:"This will have a big impact.",
+     phoneticGuide:"ɪm → 「イム」/ pækt → 「パクト」（æは口を大きく）",
+     synonyms:[
+       {word:"impact",tag:"neutral",desc:"変化をもたらす影響"},
+       {word:"effect",tag:"neutral",desc:"原因→結果の結果部分"},
+       {word:"influence",tag:"formal",desc:"じわじわと与える長期的な影響"},
+       {word:"consequence",tag:"formal",desc:"（主に悪い）結果・影響"},
+     ]},
+    {word:"manage",phonetic:"/ˈmæn.ɪdʒ/",katakana:"マネージ",pos:"動詞",meaning:"管理する・なんとかする",example:"How do you manage your time?",
+     phoneticGuide:"mæn → 「マン」（æは口を大きく）/ ɪdʒ → 「イジ」",
+     synonyms:[
+       {word:"manage",tag:"neutral",desc:"管理する・なんとかやり遂げる"},
+       {word:"handle",tag:"casual",desc:"「対処する・扱う」口語でも使いやすい"},
+       {word:"control",tag:"neutral",desc:"「制御する・コントロールする」"},
+       {word:"oversee",tag:"formal",desc:"「監督する・管理監視する」"},
+     ]},
+    {word:"suggest",phonetic:"/səˈdʒest/",katakana:"サジェスト",pos:"動詞",meaning:"提案する・示唆する",example:"I suggest we take a break.",
+     phoneticGuide:"sə → 「サ」（軽く）/ dʒest → 「ジェスト」",
+     synonyms:[
+       {word:"suggest",tag:"neutral",desc:"提案する・示唆する"},
+       {word:"recommend",tag:"neutral",desc:"「推薦する」より強く勧める"},
+       {word:"propose",tag:"formal",desc:"「正式に提案する」ビジネス・会議で"},
+       {word:"advise",tag:"formal",desc:"「アドバイスする」専門的な立場から"},
+     ]},
+    {word:"improve",phonetic:"/ɪmˈpruːv/",katakana:"インプルーヴ",pos:"動詞",meaning:"改善する・上達する",example:"I want to improve my English.",
+     phoneticGuide:"ɪm → 「イム」/ pruːv → 「プルーヴ」（uːは長く）",
+     synonyms:[
+       {word:"improve",tag:"neutral",desc:"改善する・上達する"},
+       {word:"enhance",tag:"formal",desc:"「強化する・高める」"},
+       {word:"develop",tag:"neutral",desc:"「発展させる・成長させる」"},
+       {word:"upgrade",tag:"specific",desc:"「アップグレードする」レベルを上げる"},
+     ]},
+    {word:"focus",phonetic:"/ˈfoʊ.kəs/",katakana:"フォーカス",pos:"動詞/名詞",meaning:"集中する・焦点を当てる",example:"Let's focus on the main issue.",
+     phoneticGuide:"foʊ → 「フォウ」/ kəs → 「カス」（軽く）",
+     synonyms:[
+       {word:"focus",tag:"neutral",desc:"集中する・焦点を当てる"},
+       {word:"concentrate",tag:"neutral",desc:"「集中する」より強い意志のニュアンス"},
+       {word:"prioritize",tag:"formal",desc:"「優先する」重要なものを先にする"},
+       {word:"zero in on",tag:"casual",desc:"「〜に的を絞る」"},
+     ]},
+    {word:"avoid",phonetic:"/əˈvɔɪd/",katakana:"アヴォイド",pos:"動詞",meaning:"避ける",example:"Try to avoid making mistakes.",
+     phoneticGuide:"ə → 「ア」（軽く）/ vɔɪd → 「ヴォイド」",
+     synonyms:[
+       {word:"avoid",tag:"neutral",desc:"意図的に避ける・回避する"},
+       {word:"prevent",tag:"neutral",desc:"「防ぐ・未然に防止する」"},
+       {word:"skip",tag:"casual",desc:"「スキップする・飛ばす」"},
+       {word:"refrain from",tag:"formal",desc:"「〜を控える・慎む」"},
+     ]},
+  ],
+  advanced: [
+    {word:"eloquent",phonetic:"/ˈel.ə.kwənt/",katakana:"エロクウェント",pos:"形容詞",meaning:"雄弁な・表現豊かな",example:"She gave an eloquent speech.",
+     phoneticGuide:"el → 「エル」/ ə → 曖昧な「ア」/ kwənt → 「クウェント」",
+     synonyms:[
+       {word:"eloquent",tag:"formal",desc:"言葉が流暢で表現力がある"},
+       {word:"articulate",tag:"formal",desc:"明確に考えを言語化できる"},
+       {word:"fluent",tag:"neutral",desc:"流暢な。言語習熟度を表すことが多い"},
+       {word:"expressive",tag:"neutral",desc:"感情や考えを豊かに表現する"},
+     ]},
+    {word:"ambiguous",phonetic:"/æmˈbɪɡ.ju.əs/",katakana:"アムビギュアス",pos:"形容詞",meaning:"曖昧な・二義的な",example:"His answer was deliberately ambiguous.",
+     phoneticGuide:"æm → 「アム」（æは口を大きく）/ bɪɡ → 「ビグ」/ juəs → 「ユアス」",
+     synonyms:[
+       {word:"ambiguous",tag:"formal",desc:"複数の解釈が可能"},
+       {word:"vague",tag:"neutral",desc:"漠然としている・ぼんやりした"},
+       {word:"unclear",tag:"neutral",desc:"はっきりしない。最もシンプル"},
+       {word:"equivocal",tag:"formal",desc:"どちらとも取れる。法律・政治文書で"},
+     ]},
+    {word:"pragmatic",phonetic:"/præɡˈmæt.ɪk/",katakana:"プラグマティック",pos:"形容詞",meaning:"現実的な・実用的な",example:"We need a pragmatic approach.",
+     phoneticGuide:"præɡ → 「プラグ」（æは口を大きく）/ mæt → 「マト」/ ɪk → 「イク」",
+     synonyms:[
+       {word:"pragmatic",tag:"formal",desc:"理想より現実・実用性を重視する"},
+       {word:"practical",tag:"neutral",desc:"実際に使える・現実的"},
+       {word:"realistic",tag:"neutral",desc:"現実を直視している"},
+       {word:"rational",tag:"formal",desc:"感情より論理・理性を優先する"},
+     ]},
+    {word:"nuance",phonetic:"/ˈnjuː.ɑːns/",katakana:"ニュアンス",pos:"名詞",meaning:"微妙な差異・ニュアンス",example:"The nuance was lost in translation.",
+     phoneticGuide:"njuː → 「ニュー」/ ɑːns → 「アーンス」（フランス語由来）",
+     synonyms:[
+       {word:"nuance",tag:"formal",desc:"微妙な意味の差"},
+       {word:"subtlety",tag:"formal",desc:"繊細さ・微妙さ"},
+       {word:"distinction",tag:"neutral",desc:"区別・違い。nuanceより明確な差"},
+       {word:"shade",tag:"formal",desc:"「a shade of meaning」わずかな意味の違い"},
+     ]},
+    {word:"resilient",phonetic:"/rɪˈzɪl.i.ənt/",katakana:"リジリエント",pos:"形容詞",meaning:"回復力がある・しなやかな",example:"She remained resilient through every challenge.",
+     phoneticGuide:"rɪ → 「リ」/ zɪl → 「ジル」（zは濁った音）/ i.ənt → 「イアント」",
+     synonyms:[
+       {word:"resilient",tag:"formal",desc:"逆境から素早く回復する力がある"},
+       {word:"tough",tag:"casual",desc:"精神的・肉体的に強い。口語的"},
+       {word:"tenacious",tag:"formal",desc:"粘り強い・諦めない性質"},
+       {word:"adaptable",tag:"neutral",desc:"変化に柔軟に対応できる"},
+     ]},
+    {word:"scrutinize",phonetic:"/ˈskruː.tɪ.naɪz/",katakana:"スクルーティナイズ",pos:"動詞",meaning:"綿密に調べる・精査する",example:"We need to scrutinize the data carefully.",
+     phoneticGuide:"skruː → 「スクルー」/ tɪ → 「ティ」/ naɪz → 「ナイズ」",
+     synonyms:[
+       {word:"scrutinize",tag:"formal",desc:"細部まで徹底的に調べる"},
+       {word:"examine",tag:"neutral",desc:"「検査する・調べる」"},
+       {word:"analyze",tag:"neutral",desc:"「分析する」データ・情報を詳しく調べる"},
+       {word:"inspect",tag:"formal",desc:"「視察する・点検する」"},
+     ]},
+    {word:"implication",phonetic:"/ˌɪm.plɪˈkeɪ.ʃən/",katakana:"インプリケイション",pos:"名詞",meaning:"含意・暗示・影響",example:"Consider the implications of this decision.",
+     phoneticGuide:"ɪm → 「イム」/ plɪ → 「プリ」/ keɪ → 「ケイ」/ ʃən → 「ション」",
+     synonyms:[
+       {word:"implication",tag:"formal",desc:"暗示された意味・派生する影響"},
+       {word:"suggestion",tag:"neutral",desc:"「示唆・提案」より明示的"},
+       {word:"consequence",tag:"neutral",desc:"「結果・影響」より因果関係が明確"},
+       {word:"inference",tag:"formal",desc:"「推論・推察」論理的に導かれる結論"},
+     ]},
+    {word:"concise",phonetic:"/kənˈsaɪs/",katakana:"コンサイス",pos:"形容詞",meaning:"簡潔な・要領を得た",example:"Please keep your answer concise.",
+     phoneticGuide:"kən → 「コン」（軽く）/ saɪs → 「サイス」",
+     synonyms:[
+       {word:"concise",tag:"formal",desc:"短く要点を押さえた"},
+       {word:"brief",tag:"neutral",desc:"「短い・手短な」最もシンプル"},
+       {word:"succinct",tag:"formal",desc:"「簡潔で的を射た」conciseより強調"},
+       {word:"to the point",tag:"casual",desc:"「要点を押さえた」口語的な表現"},
+     ]},
+    {word:"inevitable",phonetic:"/ɪnˈev.ɪ.tə.bəl/",katakana:"イネヴィタブル",pos:"形容詞",meaning:"避けられない・必然の",example:"Change is inevitable.",
+     phoneticGuide:"ɪn → 「イン」/ ev → 「エヴ」/ ɪtə → 「イタ」/ bəl → 「ブル」",
+     synonyms:[
+       {word:"inevitable",tag:"formal",desc:"避けることができない・必ず起こる"},
+       {word:"unavoidable",tag:"neutral",desc:"「避けられない」より日常的"},
+       {word:"certain",tag:"neutral",desc:"「確実な」必ず起こるという確信"},
+       {word:"inescapable",tag:"formal",desc:"「逃れられない」より強いニュアンス"},
+     ]},
+    {word:"elaborate",phonetic:"/ɪˈlæb.ər.ət/",katakana:"イラボレット",pos:"形容詞/動詞",meaning:"精巧な・詳しく説明する",example:"Could you elaborate on that point?",
+     phoneticGuide:"ɪ → 「イ」/ læb → 「ラブ」（æは口を大きく）/ ərət → 「アレット」",
+     synonyms:[
+       {word:"elaborate",tag:"formal",desc:"詳しく説明する / 精巧な・複雑な"},
+       {word:"explain",tag:"neutral",desc:"「説明する」最も一般的"},
+       {word:"expand on",tag:"neutral",desc:"「〜を詳しく述べる・展開する」"},
+       {word:"detail",tag:"neutral",desc:"「詳述する」具体的な詳細を述べる"},
+     ]},
+  ],
+};
+
+// ─── STATE ───────────────────────────────
+let level = "beginner";
+let queue = [];
+let currentIdx = 0;
+let flipped = false;
+let lapCount = 0; // 何周目か
+let streak = parseInt(localStorage.getItem("ll_v_streak") || "0");
+let lastDate = localStorage.getItem("ll_v_lastdate") || "";
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function init() {
+  buildQueue();
+  updateStreak();
+  render();
+}
+
+function buildQueue() {
+  queue = shuffle(VOCAB[level]);
+  currentIdx = 0;
+  flipped = false;
+}
+
+function updateStreak() {
+  document.getElementById("streak-lbl").textContent = `🔥 ${streak}日連続`;
+}
+
+function markStreak() {
+  const today = new Date().toISOString().split("T")[0];
+  if (lastDate !== today) {
+    streak++;
+    lastDate = today;
+    localStorage.setItem("ll_v_streak", streak);
+    localStorage.setItem("ll_v_lastdate", today);
+    updateStreak();
+  }
+}
+
+function setLevel(lv) {
+  level = lv;
+  lapCount = 0;
+  document.querySelectorAll(".lv-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector(".lv-btn." + lv).classList.add("active");
+  buildQueue();
+  render();
+}
+
+// ─── RENDER ──────────────────────────────
+function render() {
+  const el = document.getElementById("content");
+  const card = queue[currentIdx];
+  const total = queue.length;
+  const pct = Math.round((currentIdx / total) * 100);
+
+  el.innerHTML = `
+    ${lapCount > 0 ? `<div class="loop-badge">🔁 ${lapCount}周目</div>` : ""}
+    <div class="prog-wrap">
+      <div class="prog-label">
+        <span>${currentIdx + 1} / ${total}</span>
+        <span>${pct}%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+    </div>
+
+    <div class="word-card" onclick="flipCard()">
+      <div class="word-pos">${card.pos}</div>
+      <div class="word-title">${card.word}</div>
+      <div class="word-phonetic">${card.phonetic}</div>
+      <div class="word-katakana">📢 ${card.katakana}</div>
+      ${flipped ? `
+        <div class="word-meaning">${card.meaning}</div>
+        <div class="word-example">"${card.example}"</div>
+      ` : `<div class="click-hint">クリックして意味を確認</div>`}
+    </div>
+
+    ${flipped ? `
+      <div class="phonetic-box">
+        <div class="phonetic-box-title">🔤 発音のポイント</div>
+        <div class="phonetic-symbol">${card.phonetic}</div>
+        <div class="phonetic-desc">${card.phoneticGuide}</div>
+      </div>
+
+      <div style="display:flex;gap:0.6rem;margin-bottom:0.85rem">
+        <button class="btn btn-primary" style="flex:1;font-size:0.8rem"
+          onclick="speak('${card.word.replace(/'/g,"\\'")}')">🔊 発音を聞く</button>
+        <button class="btn" id="mic-btn" style="flex:1;font-size:0.8rem;background:var(--surface);border:1px solid var(--border)"
+          onclick="startMic('${card.word.replace(/'/g,"\\'")}')">🎤 話してみる</button>
+      </div>
+
+      <div class="mic-box" id="mic-box" style="display:none">
+        <div class="mic-box-title">🎤 発音チェック</div>
+        <div class="mic-status" id="mic-status">ボタンを押して話してください</div>
+        <div id="mic-result"></div>
+      </div>
+
+      <div class="syn-panel">
+        <div class="syn-header">🔄 シチュエーション別の言い換え</div>
+        ${card.synonyms.map(s => `
+          <div class="syn-row">
+            <div class="syn-word ${s.word === card.word ? "current" : ""}">${s.word}</div>
+            <div class="syn-detail">
+              <span class="syn-tag ${s.tag}">${s.tag === "casual" ? "カジュアル" : s.tag === "formal" ? "フォーマル" : s.tag === "specific" ? "場面限定" : "一般的"}</span><br>
+              ${s.desc}
+            </div>
+          </div>`).join("")}
+      </div>
+
+      <button class="btn btn-primary" style="width:100%" onclick="nextCard()">次へ →</button>
+    ` : ""}
+  `;
+}
+
+function flipCard() {
+  flipped = true;
+  render();
+}
+
+function nextCard() {
+  markStreak();
+  currentIdx++;
+  flipped = false;
+  if (currentIdx >= queue.length) {
+    lapCount++;
+    queue = shuffle(VOCAB[level]);
+    currentIdx = 0;
+  }
+  render();
+}
+
+function speak(text) {
+  const url = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(text);
+  const audio = new Audio(url);
+  audio.play().catch(() => {
+    window.open("https://translate.google.com/?sl=en&text=" + encodeURIComponent(text) + "&op=translate", "_blank");
+  });
+}
+
+
+// ─── 発音チェック ──────────────────────────
+const PHONETIC_ADVICE = {
+  "r": "r → 舌を口の中に浮かせて「ル」。舌先は上顎に触れない",
+  "l": "l → 舌先を上の歯茎にしっかり当てて「ル」",
+  "th": "th → 舌先を上下の歯の間に軽く挟んで息を出す",
+  "v": "v → 上の歯を下唇に当てて「ヴ」",
+  "f": "f → 上の歯を下唇に当てて息を出す「フ」",
+  "default": "もう一度ゆっくり、はっきりと話してみてください"
+};
+
+function getAdvice(target, recognized) {
+  const t = target.toLowerCase();
+  const r = recognized.toLowerCase();
+  if (r === t) return "完璧です！ネイティブに通じる発音です 🎉";
+  // 長母音チェック
+  if ((t.includes("ee") || t.includes("ea")) && !r.includes(t[0])) {
+    return "母音を長めに伸ばしてみて。例: eat → 「イーット」";
+  }
+  // r/l混同
+  if ((t.startsWith("r") && r.startsWith("l")) || (t.startsWith("l") && r.startsWith("r"))) {
+    return "r と l の区別に注意。" + PHONETIC_ADVICE["r"] + " / " + PHONETIC_ADVICE["l"];
+  }
+  // th音
+  if (t.includes("th")) return PHONETIC_ADVICE["th"];
+  // v音
+  if (t.includes("v")) return PHONETIC_ADVICE["v"];
+  // 近い場合
+  const similarity = [...t].filter((c,i) => r[i] === c).length / t.length;
+  if (similarity > 0.6) return "惜しい！もう少しゆっくり、はっきり発音してみて";
+  return PHONETIC_ADVICE["default"];
+}
+
+let recognition = null;
+
+function startMic(targetWord) {
+  const box = document.getElementById("mic-box");
+  const status = document.getElementById("mic-status");
+  const result = document.getElementById("mic-result");
+  const btn = document.getElementById("mic-btn");
+
+  if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+    box.style.display = "block";
+    status.textContent = "Chromeでのみ動作します";
+    return;
+  }
+
+  box.style.display = "block";
+  result.innerHTML = "";
+
+  if (recognition) { recognition.stop(); recognition = null; }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 3;
+
+  recognition.onstart = () => {
+    btn.classList.add("listening");
+    btn.textContent = "🔴 録音中...";
+    status.textContent = "「" + targetWord + "」と話してください";
+  };
+
+  recognition.onresult = (e) => {
+    const recognized = e.results[0][0].transcript.trim().toLowerCase();
+    const target = targetWord.toLowerCase();
+    const isCorrect = recognized === target ||
+      e.results[0].length > 1 && [...e.results[0]].some(alt => alt.transcript.trim().toLowerCase() === target);
+
+    const advice = getAdvice(target, recognized);
+
+    result.innerHTML = `
+      <div class="mic-result">
+        <div class="mic-result-row">
+          <span class="mic-result-label">目標</span>
+          <span class="mic-result-val">${targetWord}</span>
+        </div>
+        <div class="mic-result-row">
+          <span class="mic-result-label">認識結果</span>
+          <span class="mic-result-val ${isCorrect ? "correct" : "wrong"}">${recognized} ${isCorrect ? "✅" : "❌"}</span>
+        </div>
+        <div class="mic-advice">${advice}</div>
+        <button class="mic-btn" style="margin-top:0.6rem" onclick="startMic('${targetWord}')">🎤 もう一度</button>
+      </div>`;
+    status.textContent = "";
+  };
+
+  recognition.onerror = (e) => {
+    status.textContent = e.error === "no-speech" ? "声が聞こえませんでした。もう一度試してください" : "エラー: " + e.error;
+    btn.classList.remove("listening");
+    btn.textContent = "🎤 話してみる";
+  };
+
+  recognition.onend = () => {
+    btn.classList.remove("listening");
+    btn.textContent = "🎤 話してみる";
+    recognition = null;
+  };
+
+  recognition.start();
+}
+
+init();
+</script>
+</body>
+</html>
