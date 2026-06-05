@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R8P41P6ZKE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-R8P41P6ZKE');
+</script>
+<title>Pannish — スペイン語単語学習</title>
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+  --ink: #1a1208;
+  --paper: #faf7f2;
+  --surface: #f0ebe0;
+  --border: #ddd4c0;
+  --muted: #8a7860;
+  --accent: #8a1a1a;
+  --green: #2d6a4f;
+  --blue: #1a5c8a;
+  --beginner: #2d6a4f;
+  --intermediate: #c8821a;
+  --advanced: #8a1a1a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #e8e0d4; display: flex; justify-content: center; min-height: 100vh; padding: 2rem 1rem; font-family: 'Georgia', serif; }
+.app { width: 100%; max-width: 480px; background: var(--paper); border-radius: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.12); overflow: hidden; color: var(--ink); align-self: flex-start; }
+
+.hdr { padding: 1.1rem 1.5rem 0.9rem; border-bottom: 1px solid var(--border); }
+.hdr-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
+.logo { font-size: 1.4rem; font-weight: 700; }
+.logo span { color: var(--accent); }
+.streak { font-size: 0.72rem; color: var(--muted); font-family: sans-serif; background: var(--surface); padding: 3px 10px; border-radius: 20px; }
+
+.level-bar { display: flex; gap: 6px; }
+.lv-btn { flex: 1; padding: 6px 8px; border-radius: 9px; border: 1.5px solid var(--border); background: var(--paper); font-family: sans-serif; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.15s; color: var(--muted); text-align: center; }
+.lv-btn.beginner.active { background: var(--beginner); color: #fff; border-color: var(--beginner); }
+.lv-btn.intermediate.active { background: var(--intermediate); color: #fff; border-color: var(--intermediate); }
+.lv-btn.advanced.active { background: var(--advanced); color: #fff; border-color: var(--advanced); }
+.lv-btn:hover:not(.active) { border-color: var(--muted); color: var(--ink); }
+
+.content { padding: 1.25rem 1.5rem; min-height: 480px; }
+
+.prog-wrap { margin-bottom: 1rem; }
+.prog-label { display: flex; justify-content: space-between; font-size: 0.7rem; font-family: sans-serif; color: var(--muted); margin-bottom: 3px; }
+.prog-track { height: 4px; background: var(--surface); border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 4px; border-radius: 2px; transition: width 0.4s ease; background: var(--accent); }
+
+.word-card { border: 1px solid var(--border); border-radius: 18px; padding: 1.75rem 1.5rem; text-align: center; cursor: pointer; min-height: 200px; display: flex; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 0.85rem; transition: all 0.2s; background: var(--paper); border-top: 3px solid var(--accent); }
+.word-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.word-card:active { transform: scale(0.99); }
+.word-title { font-size: 1.9rem; font-weight: 700; margin-bottom: 0.25rem; letter-spacing: 0.02em; }
+.word-phonetic { font-size: 0.88rem; color: var(--accent); font-family: sans-serif; margin-bottom: 0.2rem; letter-spacing: 0.04em; }
+.word-katakana { font-size: 0.78rem; color: var(--muted); font-family: sans-serif; margin-bottom: 0.6rem; }
+.word-pos { font-size: 0.68rem; font-family: sans-serif; background: var(--surface); color: var(--muted); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-bottom: 0.6rem; }
+.word-meaning { font-size: 1rem; color: var(--accent); font-weight: 700; margin-bottom: 0.45rem; }
+.word-example { font-size: 0.8rem; color: var(--muted); font-style: italic; line-height: 1.55; }
+.click-hint { font-size: 0.72rem; color: #ccc; font-family: sans-serif; margin-top: 0.65rem; }
+
+.phonetic-box { background: var(--surface); border-radius: 11px; padding: 0.8rem 1rem; margin-bottom: 0.8rem; font-family: sans-serif; }
+.phonetic-box-title { font-size: 0.67rem; color: var(--muted); margin-bottom: 5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.phonetic-symbol { font-size: 0.95rem; color: var(--accent); font-weight: 700; margin-bottom: 4px; }
+.phonetic-desc { font-size: 0.78rem; color: var(--ink); line-height: 1.65; }
+
+.syn-panel { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 0.85rem; }
+.syn-header { background: var(--surface); padding: 0.5rem 0.9rem; font-size: 0.67rem; font-family: sans-serif; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+.syn-row { display: flex; align-items: flex-start; padding: 0.55rem 0.9rem; border-bottom: 1px solid var(--border); gap: 0.7rem; }
+.syn-row:last-child { border-bottom: none; }
+.syn-word { font-size: 0.88rem; font-weight: 700; color: var(--ink); min-width: 100px; font-family: 'Georgia', serif; flex-shrink: 0; }
+.syn-word.current { color: var(--accent); }
+.syn-detail { font-size: 0.76rem; color: var(--muted); font-family: sans-serif; line-height: 1.5; flex: 1; }
+.syn-tag { display: inline-block; font-size: 0.6rem; font-family: sans-serif; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-bottom: 2px; }
+.syn-tag.casual { background: #e8f5f0; color: var(--green); }
+.syn-tag.formal { background: #f8e8e8; color: var(--accent); }
+.syn-tag.neutral { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+.syn-tag.specific { background: #fdf0e8; color: #c8821a; }
+
+.mic-box { border: 1px solid var(--border); border-radius: 12px; padding: 1rem; margin-bottom: 0.85rem; font-family: sans-serif; }
+.mic-box-title { font-size: 0.68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.75rem; }
+.mic-btn { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 10px; font-family: sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s; background: var(--surface); color: var(--ink); }
+.mic-btn.listening { background: #fee; border-color: #c0392b; color: #c0392b; animation: pulse 1s infinite; }
+.mic-btn:hover:not(.listening) { border-color: var(--muted); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+.mic-status { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 0.55rem; min-height: 1.2em; }
+.mic-result { margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+.mic-result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+.mic-result-label { font-size: 0.7rem; color: var(--muted); }
+.mic-result-val { font-size: 0.9rem; font-weight: 700; }
+.mic-result-val.correct { color: var(--green); }
+.mic-result-val.wrong { color: #c0392b; }
+.mic-advice { font-size: 0.78rem; color: var(--ink); background: var(--surface); border-radius: 8px; padding: 0.6rem 0.8rem; margin-top: 0.6rem; line-height: 1.6; }
+
+.btn { border: none; border-radius: 9px; padding: 0.65rem 1.1rem; cursor: pointer; font-family: sans-serif; font-weight: 700; font-size: 0.85rem; transition: all 0.15s; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.btn-outline:hover { border-color: var(--muted); color: var(--ink); }
+.loop-badge { display: inline-block; font-size: 0.68rem; font-family: sans-serif; background: var(--surface); color: var(--muted); padding: 3px 10px; border-radius: 20px; margin-bottom: 0.85rem; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="hdr-top">
+      <div class="logo">🇪🇸 Pann<span>ish</span></div>
+      <div class="streak" id="streak-lbl">🔥 0日連続</div>
+    </div>
+    <div class="level-bar">
+      <button class="lv-btn beginner active" onclick="setLevel('beginner')">🟢 初級</button>
+      <button class="lv-btn intermediate" onclick="setLevel('intermediate')">🟡 中級</button>
+      <button class="lv-btn advanced" onclick="setLevel('advanced')">🔴 上級</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+const VOCAB = {
+  beginner: [
+    {word:"comer",phonetic:"/ko.ˈmer/",katakana:"コメール",pos:"動詞",meaning:"食べる",example:"Quiero comer algo rico.",
+     phoneticGuide:"ko → 「コ」/ me → 「メ」/ r → 語末は舌を上顎に近づけて軽く巻く。「コメール」",
+     synonyms:[
+       {word:"comer",tag:"neutral",desc:"最も一般的な「食べる」"},
+       {word:"almorzar",tag:"specific",desc:"昼食を食べる（lunch専用の動詞）"},
+       {word:"cenar",tag:"specific",desc:"夕食を食べる（dinner専用の動詞）"},
+       {word:"picar",tag:"casual",desc:"「つまみ食いする」軽く食べるニュアンス"},
+     ]},
+    {word:"ir",phonetic:"/ir/",katakana:"イール",pos:"動詞",meaning:"行く",example:"Voy a la escuela cada día.",
+     phoneticGuide:"i → 「イ」/ r → 舌を上顎に近づけて軽く巻く。「イール」。活用注意：voy/vas/va/vamos/vais/van",
+     synonyms:[
+       {word:"ir",tag:"neutral",desc:"最も一般的な「行く」"},
+       {word:"caminar",tag:"specific",desc:"歩いて行く"},
+       {word:"viajar",tag:"specific",desc:"旅行で移動する"},
+       {word:"dirigirse",tag:"formal",desc:"〜に向かう（フォーマル）"},
+     ]},
+    {word:"comprar",phonetic:"/kom.ˈprar/",katakana:"コンプラール",pos:"動詞",meaning:"買う",example:"Quiero comprar una bolsa nueva.",
+     phoneticGuide:"kom → 「コム」/ prar → 「プラール」。語末のrをやや巻き舌に。",
+     synonyms:[
+       {word:"comprar",tag:"neutral",desc:"最も一般的な「買う」"},
+       {word:"adquirir",tag:"formal",desc:"「取得する・入手する」公式文書で"},
+       {word:"conseguir",tag:"casual",desc:"「手に入れる」口語的な表現"},
+       {word:"pagar",tag:"specific",desc:"「支払う」お金を払うことに特化"},
+     ]},
+    {word:"querer",phonetic:"/ke.ˈrer/",katakana:"ケレール",pos:"動詞",meaning:"欲しい・〜したい・愛する",example:"Quiero aprender español.",
+     phoneticGuide:"ke → 「ケ」/ rer → 「レール」。rは巻き舌。「愛する」の意味もある多義語。",
+     synonyms:[
+       {word:"querer",tag:"neutral",desc:"「欲しい・したい」かつ「愛する」両方の意味がある"},
+       {word:"desear",tag:"formal",desc:"「望む・願う」quererより強い願望"},
+       {word:"necesitar",tag:"neutral",desc:"「必要とする」必要性のニュアンス"},
+       {word:"amar",tag:"specific",desc:"「愛する」恋愛・深い愛情に特化"},
+     ]},
+    {word:"hablar",phonetic:"/a.ˈblar/",katakana:"アブラール",pos:"動詞",meaning:"話す",example:"¿Hablas español?",
+     phoneticGuide:"h → 発音しない（silent h）/ a → 「ア」/ blar → 「ブラール」。hは無音なので「アブラール」",
+     synonyms:[
+       {word:"hablar",tag:"neutral",desc:"「話す」最も一般的"},
+       {word:"decir",tag:"neutral",desc:"「言う」言葉の内容に焦点"},
+       {word:"contar",tag:"casual",desc:"「話して聞かせる」物語・話を伝える"},
+       {word:"comentar",tag:"formal",desc:"「コメントする・意見を述べる」"},
+     ]},
+    {word:"tener",phonetic:"/te.ˈner/",katakana:"テネール",pos:"動詞",meaning:"持っている・〜がある",example:"Tengo hambre.",
+     phoneticGuide:"te → 「テ」/ ner → 「ネール」。tengo（私は持っている）は不規則変化に注意。",
+     synonyms:[
+       {word:"tener",tag:"neutral",desc:"「持っている」所有・状態を表す基本動詞"},
+       {word:"poseer",tag:"formal",desc:"「所有する」フォーマルな「持つ」"},
+       {word:"llevar",tag:"specific",desc:"「携帯する・身につけている」"},
+       {word:"haber",tag:"specific",desc:"「〜がある・いる」存在を表す助動詞"},
+     ]},
+    {word:"hacer",phonetic:"/a.ˈθer/",katakana:"アセール",pos:"動詞",meaning:"する・作る",example:"¿Qué haces hoy?",
+     phoneticGuide:"h → 発音しない/ a → 「ア」/ θer → 「セール」（スペイン本国）または「セール」（中南米）",
+     synonyms:[
+       {word:"hacer",tag:"neutral",desc:"「する・作る」英語のmake/doに相当する多用途動詞"},
+       {word:"realizar",tag:"formal",desc:"「実行する・実現する」フォーマル"},
+       {word:"crear",tag:"specific",desc:"「創造する・作り出す」"},
+       {word:"producir",tag:"formal",desc:"「生産する・制作する」"},
+     ]},
+    {word:"poder",phonetic:"/po.ˈder/",katakana:"ポデール",pos:"動詞",meaning:"できる・〜することができる",example:"¿Puedo ayudarte?",
+     phoneticGuide:"po → 「ポ」/ der → 「デール」。puedo（私はできる）は語幹母音変化に注意。",
+     synonyms:[
+       {word:"poder",tag:"neutral",desc:"「できる」能力・可能性を表す助動詞"},
+       {word:"saber",tag:"specific",desc:"「知っている・習得してできる」技術的な能力"},
+       {word:"ser capaz",tag:"formal",desc:"「〜する能力がある」フォーマルな表現"},
+       {word:"lograr",tag:"neutral",desc:"「成し遂げる・できる」努力の結果"},
+     ]},
+    {word:"ver",phonetic:"/ber/",katakana:"ベール",pos:"動詞",meaning:"見る・会う",example:"¿Puedes ver eso?",
+     phoneticGuide:"v → 唇を合わせて「ベ」（スペイン語のvはbに近い音）/ er → 「エール」",
+     synonyms:[
+       {word:"ver",tag:"neutral",desc:"「見る・見える・会う」最も一般的"},
+       {word:"mirar",tag:"neutral",desc:"「意識して見る・見つめる」"},
+       {word:"observar",tag:"formal",desc:"「観察する」注意深く見る"},
+       {word:"encontrar",tag:"specific",desc:"「会う・出会う」人と会うニュアンス"},
+     ]},
+    {word:"saber",phonetic:"/sa.ˈber/",katakana:"サベール",pos:"動詞",meaning:"知っている・わかる",example:"¿Sabes dónde está?",
+     phoneticGuide:"sa → 「サ」/ ber → 「ベール」。séは不規則形（私は知っている）",
+     synonyms:[
+       {word:"saber",tag:"neutral",desc:"「知っている・習得した技術ができる」"},
+       {word:"conocer",tag:"neutral",desc:"「（人・場所を）知っている」面識がある"},
+       {word:"entender",tag:"neutral",desc:"「理解している・わかる」"},
+       {word:"reconocer",tag:"specific",desc:"「認識する・見覚えがある」"},
+     ]},
+    {word:"dar",phonetic:"/dar/",katakana:"ダール",pos:"動詞",meaning:"与える・渡す",example:"¿Me das tu número?",
+     phoneticGuide:"d → 「ダ」/ ar → 「アール」。doy（私は与える）は不規則形。",
+     synonyms:[
+       {word:"dar",tag:"neutral",desc:"「与える・渡す」最も一般的"},
+       {word:"entregar",tag:"neutral",desc:"「手渡す・引き渡す」直接渡すニュアンス"},
+       {word:"ofrecer",tag:"formal",desc:"「提供する・申し出る」"},
+       {word:"regalar",tag:"specific",desc:"「プレゼントする・贈る」"},
+     ]},
+    {word:"llevar",phonetic:"/ʝe.ˈbar/",katakana:"ジェバール",pos:"動詞",meaning:"持っていく・運ぶ・着ている",example:"¿Llevas paraguas?",
+     phoneticGuide:"ll → 「ジェ」（地域により「ジェ」または「イェ」）/ var → 「バール」",
+     synonyms:[
+       {word:"llevar",tag:"neutral",desc:"「持っていく・運ぶ・身につけている」多用途"},
+       {word:"traer",tag:"neutral",desc:"「持ってくる」llevarは遠ざかる、traerは近づく方向"},
+       {word:"cargar",tag:"casual",desc:"「荷物を運ぶ・担ぐ」重いものを運ぶ"},
+       {word:"transportar",tag:"formal",desc:"「輸送する」フォーマルな運搬"},
+     ]},
+    {word:"poner",phonetic:"/po.ˈner/",katakana:"ポネール",pos:"動詞",meaning:"置く・つける",example:"Pon la mesa, por favor.",
+     phoneticGuide:"po → 「ポ」/ ner → 「ネール」。pongo（私は置く）は不規則形。",
+     synonyms:[
+       {word:"poner",tag:"neutral",desc:"「置く・設置する・つける」最も一般的"},
+       {word:"colocar",tag:"formal",desc:"「配置する・設置する」丁寧な表現"},
+       {word:"dejar",tag:"casual",desc:"「置いていく・残す」"},
+       {word:"situar",tag:"formal",desc:"「位置させる・据える」フォーマル"},
+     ]},
+    {word:"pasar",phonetic:"/pa.ˈsar/",katakana:"パサール",pos:"動詞",meaning:"起こる・過ごす・通る",example:"¿Qué pasa?",
+     phoneticGuide:"pa → 「パ」/ sar → 「サール」。「¿Qué pasa?」（どうしたの？）は超頻出フレーズ",
+     synonyms:[
+       {word:"pasar",tag:"neutral",desc:"「起こる・過ごす・通る」非常に多用途"},
+       {word:"ocurrir",tag:"formal",desc:"「起こる・発生する」フォーマル"},
+       {word:"suceder",tag:"formal",desc:"「起こる・続いて起こる」"},
+       {word:"transcurrir",tag:"specific",desc:"「時間が経過する」時間の流れに特化"},
+     ]},
+    {word:"salir",phonetic:"/sa.ˈlir/",katakana:"サリール",pos:"動詞",meaning:"出る・出かける",example:"¿A qué hora sales?",
+     phoneticGuide:"sa → 「サ」/ lir → 「リール」。salgo（私は出る）は不規則形。",
+     synonyms:[
+       {word:"salir",tag:"neutral",desc:"「出る・出かける・外出する」"},
+       {word:"irse",tag:"casual",desc:"「立ち去る・行ってしまう」"},
+       {word:"marcharse",tag:"neutral",desc:"「出発する・去る」"},
+       {word:"escapar",tag:"specific",desc:"「逃げる・脱出する」"},
+     ]},
+    {word:"buscar",phonetic:"/bus.ˈkar/",katakana:"ブスカール",pos:"動詞",meaning:"探す・検索する",example:"Busco un buen restaurante.",
+     phoneticGuide:"bus → 「ブス」/ kar → 「カール」。「Buscar」はGoogleで検索する時にも使う。",
+     synonyms:[
+       {word:"buscar",tag:"neutral",desc:"「探す・検索する」最も一般的"},
+       {word:"buscar",tag:"specific",desc:"「迎えに行く」'buscar a alguien'で人を迎えに行く意味にも"},
+       {word:"encontrar",tag:"neutral",desc:"「見つける」buscarの結果として使う"},
+       {word:"investigar",tag:"formal",desc:"「調査する・研究する」"},
+     ]},
+    {word:"necesitar",phonetic:"/ne.θe.si.ˈtar/",katakana:"ネセシタール",pos:"動詞",meaning:"必要とする",example:"Necesito tu ayuda.",
+     phoneticGuide:"ne → 「ネ」/ θe → 「セ」/ si → 「シ」/ tar → 「タール」",
+     synonyms:[
+       {word:"necesitar",tag:"neutral",desc:"「必要とする」最も一般的"},
+       {word:"requerir",tag:"formal",desc:"「要求する・必要とする」フォーマル"},
+       {word:"precisar",tag:"formal",desc:"「必要とする」フォーマルなビジネス表現"},
+       {word:"hacer falta",tag:"casual",desc:"「〜が必要だ・足りない」口語的"},
+     ]},
+    {word:"pensar",phonetic:"/pen.ˈsar/",katakana:"ペンサール",pos:"動詞",meaning:"思う・考える",example:"¿Qué piensas tú?",
+     phoneticGuide:"pen → 「ペン」/ sar → 「サール」。pienso（私は思う）は語幹母音変化あり。",
+     synonyms:[
+       {word:"pensar",tag:"neutral",desc:"「思う・考える」最も一般的"},
+       {word:"creer",tag:"neutral",desc:"「〜と思う・信じる」確信度が高め"},
+       {word:"opinar",tag:"formal",desc:"「意見を述べる」フォーマル"},
+       {word:"reflexionar",tag:"formal",desc:"「よく考える・熟考する」"},
+     ]},
+    {word:"vivir",phonetic:"/bi.ˈbir/",katakana:"ビビール",pos:"動詞",meaning:"住む・生きる",example:"¿Dónde vives?",
+     phoneticGuide:"v → 「ビ」（スペイン語のvはbに近い）/ vir → 「ビール」。「¿Dónde vives?」は超頻出",
+     synonyms:[
+       {word:"vivir",tag:"neutral",desc:"「住む・生きる・暮らす」"},
+       {word:"residir",tag:"formal",desc:"「居住する」フォーマルな「住む」"},
+       {word:"habitar",tag:"formal",desc:"「住む・居住する」"},
+       {word:"morar",tag:"formal",desc:"「住む」文語的・詩的表現"},
+     ]},
+    {word:"trabajar",phonetic:"/tra.ba.ˈxar/",katakana:"トラバハール",pos:"動詞",meaning:"働く・仕事する",example:"¿Dónde trabajas?",
+     phoneticGuide:"tra → 「トラ」/ ba → 「バ」/ xar → 「ハール」（xは喉の奥から出すh音）",
+     synonyms:[
+       {word:"trabajar",tag:"neutral",desc:"「働く・仕事する」最も一般的"},
+       {word:"laborar",tag:"formal",desc:"「労働する」フォーマル・文語的"},
+       {word:"currar",tag:"casual",desc:"「働く」スペイン口語のカジュアルな表現"},
+       {word:"desempeñar",tag:"formal",desc:"「（仕事・役割を）果たす」"},
+     ]},
+  ],
+  intermediate: [
+    {word:"mejorar",phonetic:"/me.xo.ˈrar/",katakana:"メホラール",pos:"動詞",meaning:"改善する・上達する",example:"Quiero mejorar mi español.",
+     phoneticGuide:"me → 「メ」/ xo → 「ホ」（喉の奥から）/ rar → 「ラール」",
+     synonyms:[
+       {word:"mejorar",tag:"neutral",desc:"「改善する・上達する」"},
+       {word:"perfeccionar",tag:"formal",desc:"「完璧にする・磨く」"},
+       {word:"desarrollar",tag:"neutral",desc:"「発展させる・成長させる」"},
+       {word:"avanzar",tag:"neutral",desc:"「進歩する・前進する」"},
+     ]},
+    {word:"conseguir",phonetic:"/kon.se.ˈɣir/",katakana:"コンセギール",pos:"動詞",meaning:"達成する・手に入れる",example:"Voy a conseguir mis metas.",
+     phoneticGuide:"kon → 「コン」/ se → 「セ」/ ɣir → 「ギール」（語幹母音変化あり）",
+     synonyms:[
+       {word:"conseguir",tag:"neutral",desc:"「達成する・手に入れる」"},
+       {word:"lograr",tag:"neutral",desc:"「成し遂げる・達成する」努力の結果"},
+       {word:"alcanzar",tag:"neutral",desc:"「達する・届く・達成する」"},
+       {word:"obtener",tag:"formal",desc:"「入手する・取得する」フォーマル"},
+     ]},
+    {word:"explicar",phonetic:"/eks.pli.ˈkar/",katakana:"エクスプリカール",pos:"動詞",meaning:"説明する",example:"¿Puedes explicar eso?",
+     phoneticGuide:"eks → 「エクス」/ pli → 「プリ」/ kar → 「カール」",
+     synonyms:[
+       {word:"explicar",tag:"neutral",desc:"「説明する」最も一般的"},
+       {word:"aclarar",tag:"neutral",desc:"「明確にする・はっきりさせる」"},
+       {word:"detallar",tag:"formal",desc:"「詳しく説明する」細部まで"},
+       {word:"resumir",tag:"neutral",desc:"「要約する」まとめて説明する"},
+     ]},
+    {word:"intentar",phonetic:"/in.ten.ˈtar/",katakana:"インテンタール",pos:"動詞",meaning:"試みる・努力する",example:"Voy a intentar hablar español.",
+     phoneticGuide:"in → 「イン」/ ten → 「テン」/ tar → 「タール」",
+     synonyms:[
+       {word:"intentar",tag:"neutral",desc:"「試みる・努力する」"},
+       {word:"tratar",tag:"neutral",desc:"「試みる・扱う」intentarとほぼ同義"},
+       {word:"esforzarse",tag:"neutral",desc:"「努力する」より強い意志のニュアンス"},
+       {word:"probar",tag:"casual",desc:"「試してみる」気軽に試すニュアンス"},
+     ]},
+    {word:"depender",phonetic:"/de.pen.ˈder/",katakana:"デペンデール",pos:"動詞",meaning:"〜次第だ・依存する",example:"Depende de la situación.",
+     phoneticGuide:"de → 「デ」/ pen → 「ペン」/ der → 「デール」",
+     synonyms:[
+       {word:"depender",tag:"neutral",desc:"「〜次第だ・依存する」"},
+       {word:"variar",tag:"neutral",desc:"「変わる・異なる」状況によって変わる"},
+       {word:"basarse en",tag:"formal",desc:"「〜に基づく」"},
+       {word:"contar con",tag:"neutral",desc:"「〜を当てにする・依存する」"},
+     ]},
+    {word:"aprovechar",phonetic:"/a.pro.be.ˈtʃar/",katakana:"アプロベチャール",pos:"動詞",meaning:"活用する・チャンスを活かす",example:"Debes aprovechar esta oportunidad.",
+     phoneticGuide:"a → 「ア」/ pro → 「プロ」/ be → 「ベ」/ tʃar → 「チャール」",
+     synonyms:[
+       {word:"aprovechar",tag:"neutral",desc:"「活用する・チャンスを活かす」"},
+       {word:"utilizar",tag:"formal",desc:"「活用する・利用する」フォーマル"},
+       {word:"sacar partido",tag:"casual",desc:"「最大限に活用する」口語的"},
+       {word:"explotar",tag:"neutral",desc:"「最大限に利用する」"},
+     ]},
+    {word:"recordar",phonetic:"/re.kor.ˈdar/",katakana:"レコルダール",pos:"動詞",meaning:"覚えている・思い出す",example:"¿Recuerdas mi nombre?",
+     phoneticGuide:"re → 「レ」/ kor → 「コル」/ dar → 「ダール」。recuerdo（私は覚えている）は語幹母音変化",
+     synonyms:[
+       {word:"recordar",tag:"neutral",desc:"「覚えている・思い出す」"},
+       {word:"acordarse",tag:"neutral",desc:"「思い出す」recordarとほぼ同義"},
+       {word:"memorizar",tag:"specific",desc:"「暗記する」意図的に覚える"},
+       {word:"rememorar",tag:"formal",desc:"「回想する」文語的"},
+     ]},
+    {word:"cambiar",phonetic:"/kam.ˈbjar/",katakana:"カンビアール",pos:"動詞",meaning:"変える・変わる",example:"Necesito cambiar de actitud.",
+     phoneticGuide:"kam → 「カム」/ bjar → 「ビアール」（bはやや柔らかい音）",
+     synonyms:[
+       {word:"cambiar",tag:"neutral",desc:"「変える・変わる」最も一般的"},
+       {word:"modificar",tag:"formal",desc:"「修正する・変更する」フォーマル"},
+       {word:"transformar",tag:"neutral",desc:"「変容させる・大きく変える」"},
+       {word:"alterar",tag:"formal",desc:"「変化させる・乱す」"},
+     ]},
+    {word:"superar",phonetic:"/su.pe.ˈrar/",katakana:"スペラール",pos:"動詞",meaning:"乗り越える・超える",example:"Hay que superar los obstáculos.",
+     phoneticGuide:"su → 「ス」/ pe → 「ペ」/ rar → 「ラール」",
+     synonyms:[
+       {word:"superar",tag:"neutral",desc:"「乗り越える・超える・上回る」"},
+       {word:"vencer",tag:"neutral",desc:"「克服する・勝つ」"},
+       {word:"sobrepasar",tag:"formal",desc:"「超過する・上回る」"},
+       {word:"resolver",tag:"neutral",desc:"「解決する」問題を乗り越える"},
+     ]},
+    {word:"confiar",phonetic:"/kon.ˈfjar/",katakana:"コンフィアール",pos:"動詞",meaning:"信頼する・信じる",example:"Confío en ti.",
+     phoneticGuide:"kon → 「コン」/ fjar → 「フィアール」（fは上の歯を下唇に当てる）",
+     synonyms:[
+       {word:"confiar",tag:"neutral",desc:"「信頼する・信じる」"},
+       {word:"creer",tag:"neutral",desc:"「信じる・〜と思う」"},
+       {word:"fiarse",tag:"casual",desc:"「信用する・頼る」口語的"},
+       {word:"contar con",tag:"neutral",desc:"「〜を当てにする・信頼する」"},
+     ]},
+  ],
+  advanced: [
+    {word:"perseverar",phonetic:"/per.se.βe.ˈrar/",katakana:"ペルセベラール",pos:"動詞",meaning:"忍耐強く続ける",example:"Hay que perseverar para tener éxito.",
+     phoneticGuide:"per → 「ペル」/ se → 「セ」/ βe → 「ベ」（柔らかいb音）/ rar → 「ラール」",
+     synonyms:[
+       {word:"perseverar",tag:"formal",desc:"「忍耐強く続ける」文語的・強い意志"},
+       {word:"persistir",tag:"neutral",desc:"「粘り強く続ける」perseverarとほぼ同義"},
+       {word:"insistir",tag:"neutral",desc:"「主張し続ける・こだわる」"},
+       {word:"aguantar",tag:"casual",desc:"「耐える・我慢する」口語的"},
+     ]},
+    {word:"ambiguo",phonetic:"/am.ˈbi.ɣwo/",katakana:"アンビグオ",pos:"形容詞",meaning:"曖昧な・二義的な",example:"Su respuesta fue deliberadamente ambigua.",
+     phoneticGuide:"am → 「アム」/ bi → 「ビ」/ ɣwo → 「グオ」（ɣは喉の奥で出すg音）",
+     synonyms:[
+       {word:"ambiguo",tag:"formal",desc:"「曖昧な」複数の解釈が可能"},
+       {word:"vago",tag:"neutral",desc:"「漠然とした・ぼんやりした」"},
+       {word:"impreciso",tag:"neutral",desc:"「不正確な・はっきりしない」"},
+       {word:"equívoco",tag:"formal",desc:"「誤解を招く・どちらとも取れる」"},
+     ]},
+    {word:"matiz",phonetic:"/ma.ˈtiθ/",katakana:"マティス",pos:"名詞",meaning:"ニュアンス・微妙な差異",example:"El matiz en su tono fue importante.",
+     phoneticGuide:"ma → 「マ」/ tiθ → 「ティス」（θはスペイン本国では「ス」に近い音）",
+     synonyms:[
+       {word:"matiz",tag:"formal",desc:"「ニュアンス・微妙な差異・色調」"},
+       {word:"sutileza",tag:"formal",desc:"「繊細さ・微妙さ」"},
+       {word:"distinción",tag:"neutral",desc:"「区別・違い」より明確な差"},
+       {word:"detalle",tag:"neutral",desc:"「細部・ディテール」具体的な差"},
+     ]},
+    {word:"pragmático",phonetic:"/praɡ.ˈma.ti.ko/",katakana:"プラグマティコ",pos:"形容詞",meaning:"現実的な・実用的な",example:"Necesitamos un enfoque pragmático.",
+     phoneticGuide:"praɡ → 「プラグ」/ ma → 「マ」（アクセント）/ ti → 「ティ」/ ko → 「コ」",
+     synonyms:[
+       {word:"pragmático",tag:"formal",desc:"「現実的な・実用的な」理想より現実重視"},
+       {word:"práctico",tag:"neutral",desc:"「実用的な・実際に使える」"},
+       {word:"realista",tag:"neutral",desc:"「現実的な」現実を直視している"},
+       {word:"racional",tag:"formal",desc:"「合理的な」感情より論理を優先"},
+     ]},
+    {word:"resiliencia",phonetic:"/re.si.ˈlien.θja/",katakana:"レシリエンシア",pos:"名詞",meaning:"回復力・レジリエンス",example:"La resiliencia es clave para el éxito.",
+     phoneticGuide:"re → 「レ」/ si → 「シ」/ lien → 「リエン」/ θja → 「シア」",
+     synonyms:[
+       {word:"resiliencia",tag:"formal",desc:"「回復力・レジリエンス」逆境からの回復力"},
+       {word:"fortaleza",tag:"formal",desc:"「強さ・強固さ」精神的・肉体的な強さ"},
+       {word:"tenacidad",tag:"formal",desc:"「粘り強さ・執念」"},
+       {word:"adaptabilidad",tag:"formal",desc:"「適応力」変化に対応する力"},
+     ]},
+    {word:"elocuente",phonetic:"/e.lo.ˈkwen.te/",katakana:"エロクエンテ",pos:"形容詞",meaning:"雄弁な・表現豊かな",example:"Ella es una oradora muy elocuente.",
+     phoneticGuide:"e → 「エ」/ lo → 「ロ」/ kwen → 「クエン」/ te → 「テ」",
+     synonyms:[
+       {word:"elocuente",tag:"formal",desc:"「雄弁な・表現豊かな」"},
+       {word:"expresivo",tag:"neutral",desc:"「表現力豊かな」感情・考えを豊かに表現"},
+       {word:"fluido",tag:"neutral",desc:"「流暢な」言語習熟度を表す"},
+       {word:"articulado",tag:"formal",desc:"「明確に言語化できる」"},
+     ]},
+    {word:"imprescindible",phonetic:"/im.pres.θin.ˈdi.ble/",katakana:"インプレシンディブレ",pos:"形容詞",meaning:"不可欠な・必須の",example:"El inglés es imprescindible hoy en día.",
+     phoneticGuide:"im → 「イム」/ pres → 「プレス」/ θin → 「シン」/ di → 「ディ」/ ble → 「ブレ」",
+     synonyms:[
+       {word:"imprescindible",tag:"formal",desc:"「不可欠な・必須の」"},
+       {word:"esencial",tag:"neutral",desc:"「本質的な・必須の」"},
+       {word:"necesario",tag:"neutral",desc:"「必要な」最もシンプル"},
+       {word:"indispensable",tag:"formal",desc:"「欠かせない」imprescindibleとほぼ同義"},
+     ]},
+    {word:"comprender",phonetic:"/kom.pren.ˈder/",katakana:"コンプレンデール",pos:"動詞",meaning:"理解する・把握する",example:"¿Comprendes la situación?",
+     phoneticGuide:"kom → 「コム」/ pren → 「プレン」/ der → 「デール」",
+     synonyms:[
+       {word:"comprender",tag:"neutral",desc:"「理解する・把握する」entenderより深い理解"},
+       {word:"entender",tag:"neutral",desc:"「理解する・わかる」日常的に最もよく使われる"},
+       {word:"captar",tag:"casual",desc:"「把握する・キャッチする」口語的"},
+       {word:"asimilar",tag:"formal",desc:"「吸収する・身につける」"},
+     ]},
+    {word:"trascender",phonetic:"/tras.θen.ˈder/",katakana:"トラスセンデール",pos:"動詞",meaning:"超越する・広まる",example:"Su mensaje trasciende fronteras.",
+     phoneticGuide:"tras → 「トラス」/ θen → 「セン」/ der → 「デール」",
+     synonyms:[
+       {word:"trascender",tag:"formal",desc:"「超越する・枠を超えて広まる」"},
+       {word:"superar",tag:"neutral",desc:"「超える・上回る」"},
+       {word:"sobrepasar",tag:"formal",desc:"「超過する」"},
+       {word:"difundirse",tag:"neutral",desc:"「広まる・普及する」"},
+     ]},
+    {word:"consolidar",phonetic:"/kon.so.li.ˈdar/",katakana:"コンソリダール",pos:"動詞",meaning:"強化する・定着させる",example:"Hay que consolidar los conocimientos.",
+     phoneticGuide:"kon → 「コン」/ so → 「ソ」/ li → 「リ」/ dar → 「ダール」",
+     synonyms:[
+       {word:"consolidar",tag:"formal",desc:"「強化する・定着させる・統合する」"},
+       {word:"fortalecer",tag:"formal",desc:"「強化する・強くする」"},
+       {word:"afianzar",tag:"formal",desc:"「固める・安定させる」"},
+       {word:"reforzar",tag:"neutral",desc:"「強化する・補強する」"},
+     ]},
+  ],
+};
+
+let level = "beginner";
+let queue = [];
+let currentIdx = 0;
+let flipped = false;
+let lapCount = 0;
+let streak = parseInt(localStorage.getItem("ll_es_streak") || "0");
+let lastDate = localStorage.getItem("ll_es_lastdate") || "";
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+
+function init() {
+  buildQueue();
+  updateStreak();
+  render();
+}
+
+function buildQueue() {
+  queue = shuffle(VOCAB[level]);
+  currentIdx = 0;
+  flipped = false;
+  lapCount = 0;
+}
+
+function updateStreak() {
+  document.getElementById("streak-lbl").textContent = `🔥 ${streak}日連続`;
+}
+
+function markStreak() {
+  const today = new Date().toISOString().split("T")[0];
+  if (lastDate !== today) {
+    streak++;
+    lastDate = today;
+    localStorage.setItem("ll_es_streak", streak);
+    localStorage.setItem("ll_es_lastdate", today);
+    updateStreak();
+  }
+}
+
+function setLevel(lv) {
+  level = lv;
+  document.querySelectorAll(".lv-btn").forEach(b => b.classList.remove("active"));
+  document.querySelector(".lv-btn." + lv).classList.add("active");
+  buildQueue();
+  render();
+}
+
+function render() {
+  const el = document.getElementById("content");
+  const card = queue[currentIdx];
+  const total = queue.length;
+  const pct = Math.round((currentIdx / total) * 100);
+
+  el.innerHTML = `
+    ${lapCount > 0 ? `<div class="loop-badge">🔁 ${lapCount}周目</div>` : ""}
+    <div class="prog-wrap">
+      <div class="prog-label">
+        <span>${currentIdx + 1} / ${total}</span>
+        <span>${pct}%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+    </div>
+
+    <div class="word-card" onclick="flipCard()">
+      <div class="word-pos">${card.pos}</div>
+      <div class="word-title">${card.word}</div>
+      <div class="word-phonetic">${card.phonetic}</div>
+      <div class="word-katakana">📢 ${card.katakana}</div>
+      ${flipped ? `
+        <div class="word-meaning">${card.meaning}</div>
+        <div class="word-example">"${card.example}"</div>
+      ` : `<div class="click-hint">クリックして意味を確認</div>`}
+    </div>
+
+    ${flipped ? `
+      <div class="phonetic-box">
+        <div class="phonetic-box-title">🔤 発音のポイント</div>
+        <div class="phonetic-symbol">${card.phonetic}</div>
+        <div class="phonetic-desc">${card.phoneticGuide}</div>
+      </div>
+
+      <div style="display:flex;gap:0.6rem;margin-bottom:0.85rem">
+        <button class="btn btn-primary" style="flex:1;font-size:0.8rem"
+          onclick="speak('${card.word.replace(/'/g,"\\'")}')">🔊 発音を聞く</button>
+        <button class="btn" id="mic-btn" style="flex:1;font-size:0.8rem;background:var(--surface);border:1px solid var(--border)"
+          onclick="startMic('${card.word.replace(/'/g,"\\'")}')">🎤 話してみる</button>
+      </div>
+
+      <div class="mic-box" id="mic-box" style="display:none">
+        <div class="mic-box-title">🎤 発音チェック</div>
+        <div class="mic-status" id="mic-status">ボタンを押して話してください</div>
+        <div id="mic-result"></div>
+      </div>
+
+      <div class="syn-panel">
+        <div class="syn-header">🔄 シチュエーション別の言い換え</div>
+        ${card.synonyms.map(s => `
+          <div class="syn-row">
+            <div class="syn-word ${s.word === card.word ? "current" : ""}">${s.word}</div>
+            <div class="syn-detail">
+              <span class="syn-tag ${s.tag}">${s.tag === "casual" ? "カジュアル" : s.tag === "formal" ? "フォーマル" : s.tag === "specific" ? "場面限定" : "一般的"}</span><br>
+              ${s.desc}
+            </div>
+          </div>`).join("")}
+      </div>
+
+      <button class="btn btn-primary" style="width:100%" onclick="nextCard()">次へ →</button>
+    ` : ""}
+  `;
+}
+
+function flipCard() { flipped = true; render(); }
+
+function nextCard() {
+  markStreak();
+  currentIdx++;
+  flipped = false;
+  if (currentIdx >= queue.length) {
+    lapCount++;
+    queue = shuffle(VOCAB[level]);
+    currentIdx = 0;
+  }
+  render();
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const trySpeak = () => {
+    const voices = window.speechSynthesis.getVoices();
+    const u = new SpeechSynthesisUtterance(text);
+    const googleVoice = voices.find(v => v.lang.startsWith('es') && v.name.includes('Google'));
+    const esVoice = voices.find(v => v.lang.startsWith('es'));
+    if (googleVoice) u.voice = googleVoice;
+    else if (esVoice) u.voice = esVoice;
+    u.lang = 'es-ES';
+    u.rate = 0.82;
+    u.pitch = 1;
+    window.speechSynthesis.speak(u);
+  };
+  if (window.speechSynthesis.getVoices().length === 0) {
+    window.speechSynthesis.onvoiceschanged = trySpeak;
+  } else {
+    trySpeak();
+  }
+}
+
+const ES_PHONETIC_ADVICE = {
+  "r": "r → 舌先を上顎に軽く当てて巻き舌に。語末や語中のrに注意",
+  "rr": "rr → 強い巻き舌。舌を震わせて「ルル」のように",
+  "v": "v → スペイン語のvはbに近い音。唇を合わせて「バ」",
+  "h": "h → スペイン語のhは発音しない（silent h）",
+  "j": "j/x → 喉の奥から出す強いh音。「ハ」より強く",
+  "ll": "ll → 「ジェ」または「イェ」（地域により異なる）",
+  "default": "もう一度ゆっくり、はっきりと話してみてください"
+};
+
+function getESAdvice(target, recognized) {
+  const t = target.toLowerCase();
+  const r = recognized.toLowerCase();
+  if (r === t) return "完璧です！ネイティブに通じる発音です 🎉";
+  if (t.includes("rr")) return ES_PHONETIC_ADVICE["rr"];
+  if (t.startsWith("h")) return ES_PHONETIC_ADVICE["h"];
+  if (t.includes("ll")) return ES_PHONETIC_ADVICE["ll"];
+  if (t.includes("j") || t.includes("x")) return ES_PHONETIC_ADVICE["j"];
+  const similarity = [...t].filter((c, i) => r[i] === c).length / t.length;
+  if (similarity > 0.6) return "惜しい！もう少しゆっくり、はっきり発音してみて";
+  return ES_PHONETIC_ADVICE["default"];
+}
+
+let recognition = null;
+
+function startMic(targetWord) {
+  const box = document.getElementById("mic-box");
+  const status = document.getElementById("mic-status");
+  const result = document.getElementById("mic-result");
+  const btn = document.getElementById("mic-btn");
+
+  if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+    box.style.display = "block";
+    status.textContent = "Chromeでのみ動作します";
+    return;
+  }
+
+  box.style.display = "block";
+  result.innerHTML = "";
+
+  if (recognition) { recognition.stop(); recognition = null; }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = "es-ES";
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 5;
+
+  recognition.onstart = () => {
+    btn.classList.add("listening");
+    btn.textContent = "🔴 録音中...";
+    status.textContent = "「" + targetWord + "」と話してください";
+  };
+
+  recognition.onresult = (e) => {
+    let recognized = "";
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      recognized = e.results[i][0].transcript.trim().toLowerCase();
+      if (e.results[i].isFinal) break;
+    }
+    if (!recognized) return;
+    const target = targetWord.toLowerCase();
+    const isCorrect = recognized === target;
+    const advice = getESAdvice(target, recognized);
+
+    result.innerHTML = `
+      <div class="mic-result">
+        <div class="mic-result-row">
+          <span class="mic-result-label">目標</span>
+          <span class="mic-result-val">${targetWord}</span>
+        </div>
+        <div class="mic-result-row">
+          <span class="mic-result-label">認識結果</span>
+          <span class="mic-result-val ${isCorrect ? "correct" : "wrong"}">${recognized} ${isCorrect ? "✅" : "❌"}</span>
+        </div>
+        <div class="mic-advice">${advice}</div>
+        <button class="mic-btn" style="margin-top:0.6rem" onclick="startMic('${targetWord}')">🎤 もう一度</button>
+      </div>`;
+    status.textContent = "";
+  };
+
+  recognition.onerror = (e) => {
+    status.textContent = e.error === "no-speech" ? "声が聞こえませんでした。もう一度試してください" : "エラー: " + e.error;
+    btn.classList.remove("listening");
+    btn.textContent = "🎤 話してみる";
+  };
+
+  recognition.onend = () => {
+    btn.classList.remove("listening");
+    btn.textContent = "🎤 話してみる";
+    recognition = null;
+  };
+
+  recognition.start();
+}
+
+init();
+</script>
+</body>
+</html>
